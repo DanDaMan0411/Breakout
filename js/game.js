@@ -8,6 +8,7 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {
 function preload(){
 	game.load.image('paddle', 'assets/paddle.png');
 	game.load.image('ball', 'assets/ball.png');
+	game.load.image('background1', 'assets/background1.jpg');
 	game.load.spritesheet('redBlock', 'assets/block.png', 176/4, 66/3, 6);
 }
 
@@ -37,6 +38,8 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+var blocksOnScreen = 0;
+
 //Sets up the blocks into different formations
 setUpRectangle = function(blockWidth, blockHeight){
 	var blocksInRow = 10;
@@ -53,6 +56,8 @@ setUpRectangle = function(blockWidth, blockHeight){
 			block.body.immovable = true;
 			
 			block.frame = getRandomInt(0, blocksAmount)
+			
+			blocksOnScreen ++;
 		}
 		blockYPos ++
 	}
@@ -69,6 +74,8 @@ setUpSmileyFace = function(blockWidth, blockHeight){
 		block.body.immovable = true;
 		
 		block.frame = getRandomInt(0, blocksAmount)
+		
+		blocksOnScreen ++;
 	}
 	
 	for (var col = 0; col < numRows; col ++){
@@ -116,11 +123,16 @@ var gameBlocks = function(){
 }
 
 var gameBall = function(){
-	ball = game.add.sprite(game.world.centerX, (game.world.centerY*1.8) - paddle.body.height - 100, "ball");
+	ball = game.add.sprite(game.world.centerX, (game.world.centerY*1.8) - paddle.body.height, "ball");
 	
 	//Scales down the ball
 	ball.anchor.setTo(.5, .5);
-	ball.scale.setTo(0.05, 0.05);
+	
+	//Huge ball
+	//ball.scale.setTo(2, 2);
+	
+	//Regular ball
+	ball.scale.setTo(.035, .035);
 	
 	game.physics.arcade.enable(ball);
 	
@@ -140,9 +152,9 @@ function create(){
 	//Gets the keyboard input of up down left right
 	cursors = game.input.keyboard.createCursorKeys();
 	
-	game.physics.startSystem(Phaser.Physics.ARCADE);
+	gameBackground = game.add.sprite(0, 0, "background1")
 	
-	game.stage.backgroundColor = "#C0C0C0";
+	game.physics.startSystem(Phaser.Physics.ARCADE);
 
 	gamePaddle();
 	gameBall();
@@ -156,18 +168,32 @@ function create(){
 }
 
 var paddleVelocity = 800;
+var level = 1;
+
+function levelComplete(){
+	console.log("Level complete");
+	level ++;
+	gameBlocks();
+	console.log(level)
+	gameRun = false;
+	
+}
 
 function breakBlock(ball, block){
 	game.physics.arcade.collide(block, ball);
 	block.kill()
+	blocksOnScreen --;
+	
+	if (blocksOnScreen == 0){
+		levelComplete()
+	}
 }
 
 function ballVelocity(ball, paddle){
 	game.physics.arcade.collide(ball, paddle);
 	var velocityChange = Math.abs(ball.x - paddle.x)
-	console.log(velocityChange)
 	
-	ball.body.velocity.x += velocityChange
+	ball.body.velocity.x += velocityChange*2
 	
 }
 
@@ -182,7 +208,7 @@ function restartBall(){
 	//Resets the ball position
 	ball.body.velocity.setTo(0, 0);
 	ball.body.x = paddle.x - ball.body.width/2
-	ball.body.y = (game.world.centerY*1.8) - paddle.body.height - 8;
+	ball.body.y = (game.world.centerY*1.8) - paddle.body.height;
 	  
 }
 
@@ -196,17 +222,18 @@ function update(){
 		paddle.body.velocity.x = paddleVelocity;
 	}
 	
-	//This starts the game where the ball starts moving
-	if (this.spaceKey.isDown){
-		if (!gameRun){
-			gameRun = true;
-			startGame();
-		}
-	}
-	
 	//Runs when the game is not running
 	if (!gameRun){
 		restartBall();
+	}
+	
+	//This starts the game where the ball starts moving
+	if (this.spaceKey.isDown){
+		if (!gameRun){
+			console.log(22222222)
+			gameRun = true;
+			startGame();
+		}
 	}
 	
 	if (gameRun){
@@ -217,6 +244,9 @@ function update(){
 		//Sees if the ball hit the bottom of the screen		
 		if (ball.body.y + ball.body.height >= game.world.height){
 			gameRun = false;
+			
+			//This prevents people who hold down the space bar to mess up the beginning of the next round
+			this.spaceKey.isDown = false;
 		}
 	}
 }
