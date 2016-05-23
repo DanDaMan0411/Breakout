@@ -5,21 +5,30 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {
 	render: render,
 });
 
-function preload(){
-	game.load.image('paddle', 'assets/paddle.png');
-	game.load.image('ball', 'assets/ball.png');
-	game.load.image('background1', 'assets/background1.jpg');
-	game.load.spritesheet('redBlock', 'assets/block.png', 176/4, 66/3, 6);
-}
-
 var paddle;
 var ball;
 var blocks;
-var blocksAmount = 12
+var blocksAmount = 8;
+var spaceKey;
+var blocksOnScreen = 0;
+var paddleVelocity = 800;
+var level = 1;
+var gameRun = false;
+var enlargePaddle;
+var EPPowerUps;
+var enlargedPaddle;
+
+function preload(){
+	game.load.image('paddle', 'assets/paddle.png');
+	game.load.image('ball', 'assets/ball.png');
+	game.load.image('background1', 'assets/background1.png');
+	game.load.image('enlargePaddle', 'assets/enlargePaddle.png');
+	game.load.spritesheet('block', 'assets/block.png', 176/4, 66/3, blocksAmount);
+}
 
 var gamePaddle = function(){
 	paddle = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, "paddle");
-	
+
 	//This makes the center of the paddle in the middle instead of the top left corner
 	paddle.anchor.setTo(.5, .5);
 	paddle.scale.setTo(.5, .5);
@@ -37,76 +46,6 @@ var gamePaddle = function(){
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-var blocksOnScreen = 0;
-
-//Sets up the blocks into different formations
-setUpRectangle = function(blockWidth, blockHeight){
-	var blocksInRow = 10;
-	var numRows = 10;
-	var blockYPos = 1;
-	
-	for (var col = 0; col < numRows; col ++){
-		for (var i = 0; i < blocksInRow; i++)
-		{
-			var centerBlock = (game.world.width - blocksInRow*blockWidth)/2;
-
-			var block = blocks.create(i * blockWidth + centerBlock, blockYPos * blockHeight, 'redBlock');
-			block.enableBody = true;
-			block.body.immovable = true;
-			
-			block.frame = getRandomInt(0, blocksAmount)
-			
-			blocksOnScreen ++;
-		}
-		blockYPos ++
-	}
-}
-
-setUpSmileyFace = function(blockWidth, blockHeight){
-	var blocksInRow = 10
-	var numRows = 14;
-	var blockYPos = 1;
-	
-	this.drawBlock = function(){
-		var block = blocks.create(row * blockWidth + centerBlock, blockYPos * blockHeight, 'redBlock');
-		block.enableBody = true;
-		block.body.immovable = true;
-		
-		block.frame = getRandomInt(0, blocksAmount)
-		
-		blocksOnScreen ++;
-	}
-	
-	for (var col = 0; col < numRows; col ++){
-		for (var row = 0; row < blocksInRow; row++)
-		{
-			var centerBlock = (game.world.width - blocksInRow*blockWidth)/2;
-			
-			//Makes the eyes
-			if (row < 3 || row > blocksInRow - 4){
-				if (col < 5){
-					self.drawBlock()
-				}
-			}
-			
-			//Makes the mouth
-			if (row < 2 || row > blocksInRow -3){
-				if (col > 7 && col < 11){
-					self.drawBlock()
-				}
-			}
-			
-			//Makes the mouth
-			if (col > 10){
-				self.drawBlock()
-			}
-			
-		}
-		blockYPos ++
-	}
-}
-
 
 var gameBlocks = function(){
 	var blockWidth = 176/4;
@@ -146,14 +85,17 @@ var gameBall = function(){
 	ball.body.bounce.setTo(1, 1);
 }
 
-var spaceKey;
+var EPPowerUp = function(){
+	EPPowerUps = game.add.group();
+	EPPowerUps.enableBody = true;
+}
 
 function create(){
 	//Gets the keyboard input of up down left right
 	cursors = game.input.keyboard.createCursorKeys();
 	
 	gameBackground = game.add.sprite(0, 0, "background1")
-	
+	gameBackground.scale.setTo(2, 2)
 	game.physics.startSystem(Phaser.Physics.ARCADE);
 
 	gamePaddle();
@@ -161,14 +103,13 @@ function create(){
 	
 	gameBlocks();
 	
+	EPPowerUp();
+	
 	this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
 	game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR])
 	
 }
-
-var paddleVelocity = 800;
-var level = 1;
 
 function levelComplete(){
 	console.log("Level complete");
@@ -176,7 +117,20 @@ function levelComplete(){
 	gameBlocks();
 	console.log(level)
 	gameRun = false;
+}
+
+function generateEnlargePaddle(ball, block){	
+	var enlargePaddle = EPPowerUps.create(block.x, block.y, "enlargePaddle")
 	
+	//console.log(EPPowerUps.children.length)
+	
+	var scaleFactor = enlargePaddle.height/50
+		
+	enlargePaddle.enableBody = true;
+	enlargePaddle.scale.setTo(1/scaleFactor, 1/scaleFactor);
+	enlargePaddle.body.height = 50;
+	enlargePaddle.body.width = 50;
+	enlargePaddle.body.velocity.setTo(0, 100);
 }
 
 function breakBlock(ball, block){
@@ -184,9 +138,39 @@ function breakBlock(ball, block){
 	block.kill()
 	blocksOnScreen --;
 	
+	var powerUpOdds = getRandomInt(1, 1);
+	
+	if (powerUpOdds == 1){
+		generateEnlargePaddle(ball, block)
+	}
+	
 	if (blocksOnScreen == 0){
 		levelComplete()
 	}
+}
+
+function makeEnlargePaddle(){
+	enlargedPaddle = game.add.sprite(paddle.x, paddle.y, "paddle");
+	enlargedPaddle.scale.setTo(1.7, .5);
+	enlargedPaddle.anchor.setTo(.5, .5);
+	
+	enlargedPaddle.enableBody = true;
+	
+	game.physics.arcade.enable(enlargedPaddle);
+	var paddles = game.add.group();
+	
+	paddles.add(paddle);
+	paddles.add(enlargedPaddle);
+	
+	enlargedPaddle.body.immovable = true;
+}
+
+function gotEnlargePaddle(paddle, enlargePaddle){
+	enlargePaddle.kill();
+	if (enlargedPaddle != null){
+		enlargedPaddle.kill();
+	}
+	makeEnlargePaddle();	
 }
 
 function ballVelocity(ball, paddle){
@@ -197,10 +181,8 @@ function ballVelocity(ball, paddle){
 	
 }
 
-gameRun = false;
-
 var startGame = function(){
-	ball.body.velocity.setTo(500, -500);
+	ball.body.velocity.setTo(500, -400);
 }
 
 //This puts the ball back into position if it hits the bottom of the screen
@@ -213,9 +195,11 @@ function restartBall(){
 }
 
 function update(){
-	//Controls for the paddle
-	paddle.body.velocity.x = 0
-	
+	if (enlargedPaddle != null){
+		enlargedPaddle.body.x = paddle.body.x;
+	}
+	//Controls for the paddle	
+	paddle.body.velocity.x = 0;
 	if (cursors.left.isDown){
 		paddle.body.velocity.x = -1 * paddleVelocity;
 	}else if (cursors.right.isDown){
@@ -230,17 +214,19 @@ function update(){
 	//This starts the game where the ball starts moving
 	if (this.spaceKey.isDown){
 		if (!gameRun){
-			console.log(22222222)
 			gameRun = true;
 			startGame();
 		}
 	}
 	
+	game.physics.arcade.overlap(paddle, EPPowerUps, gotEnlargePaddle, null, this);
+	
 	if (gameRun){
 		//Hit AI
 		game.physics.arcade.overlap(ball, blocks, breakBlock, null, this);
 		game.physics.arcade.overlap(ball, paddle, ballVelocity, null, this);
-		
+		game.physics.arcade.collide(enlargedPaddle, ball);
+
 		//Sees if the ball hit the bottom of the screen		
 		if (ball.body.y + ball.body.height >= game.world.height){
 			gameRun = false;
