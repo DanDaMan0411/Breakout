@@ -5,7 +5,7 @@
 setUpRectangle = function(blockWidth, blockHeight){
 	var numCols = 12;
 	var numRows = 8;
-	var blockYPos = 3;
+	var blockYPos = 2;
 	
 	for (var row = 0; row < numRows; row ++){
 		for (var col = 0; col < numCols; col++)
@@ -28,7 +28,7 @@ setUpRectangle = function(blockWidth, blockHeight){
 setUpSmileyFace = function(blockWidth, blockHeight){
 	var blocksInRow = 10
 	var numRows = 14;
-	var blockYPos = 1;
+	var blockYPos = 2;
 	
 	this.drawBlock = function(frameNumber){
 		var block = blocks.create(row * blockWidth + centerBlock, blockYPos * blockHeight, 'block');
