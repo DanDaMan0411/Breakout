@@ -7,8 +7,13 @@ setUpRectangle = function(blockWidth, blockHeight){
 	var numRows = 8;
 	var blockYPos = 2;
 	
-	for (var row = 0; row < numRows; row ++){
-		for (var col = 0; col < numCols; col++)
+	var blockMap = [
+		["W", "W", "W", "W"],
+		["O", "O", "O", "O"],
+	]
+	
+	for (var row = 0; row < blockMap.length; row ++){
+		for (var col = 0; col < blockMap[row]; col++)
 		{
 			var centerBlock = (game.world.width - numCols*blockWidth)/2;
 
@@ -23,6 +28,22 @@ setUpRectangle = function(blockWidth, blockHeight){
 		}
 		blockYPos ++
 	}
+	/*for (var row = 0; row < numRows; row ++){
+		for (var col = 0; col < numCols; col++)
+		{
+			var centerBlock = (game.world.width - numCols*blockWidth)/2;
+
+			var block = blocks.create(col * blockWidth + centerBlock, blockYPos * blockHeight, 'block');
+			block.enableBody = true;
+			block.body.immovable = true;
+			
+			//This makes a rainbow design with the blocks
+			block.frame = row
+			
+			blocksOnScreen ++;
+		}
+		blockYPos ++
+	}*/
 }
 
 setUpSmileyFace = function(blockWidth, blockHeight){

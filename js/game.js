@@ -1,4 +1,4 @@
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {
+var game = new Phaser.Game(800, 700, Phaser.CANVAS, '', {
 	preload: preload,
 	create: create, 
 	update: update,
@@ -25,6 +25,8 @@ var enlargeTime = 0;
 
 var score = 0;
 var scoreText;
+
+var ballVX = 400;
 
 function preload(){
 	game.load.image('paddle', 'assets/paddle.png');
@@ -142,9 +144,7 @@ function levelComplete(){
 
 function generateEnlargePaddle(ball, block){	
 	var enlargePaddle = EPPowerUps.create(block.x, block.y, "enlargePaddle")
-	
-	//console.log(EPPowerUps.children.length)
-	
+		
 	var scaleFactor = enlargePaddle.height/50
 		
 	enlargePaddle.enableBody = true;
@@ -162,7 +162,7 @@ function breakBlock(ball, block){
 	block.kill()
 	blocksOnScreen --;
 	
-	var powerUpOdds = getRandomInt(1, 1);
+	var powerUpOdds = getRandomInt(1, 5);
 	
 	if (powerUpOdds == 1){
 		generateEnlargePaddle(ball, block);
@@ -199,6 +199,9 @@ function makeEnlargePaddle(){
 	enlargedPaddle.enableBody = true;
 	
 	game.physics.arcade.enable(enlargedPaddle);
+	
+	enlargedPaddle.body.collideWorldBounds = true;
+	
 	var paddles = game.add.group();
 	
 	paddles.add(paddle);
@@ -231,17 +234,28 @@ function gotEnlargePaddle(paddle, enlargePaddle){
 
 function ballVelocity(ball, paddle){
 	game.physics.arcade.collide(ball, paddle);
-	var ballVX = 400
-	var velocityChange = Math.abs(ball.x - paddle.x);
 	
-	console.log(velocityChange)
+	if (enlargedPaddle == null){
+		var distanceDif = Math.abs(ball.x - paddle.x);
+		var velocityChange = distanceDif/(paddle.body.width/2)
+	}else{
+		var distanceDif = Math.abs(ball.x - enlargedPaddle.x);
+		var velocityChange = distanceDif/(enlargedPaddle.body.width/2)
+	}
 	
-	ball.body.velocity.x += velocityChange*2;
+	//ballVX = 0;
+	
+	if (ball.x < paddle.x){
+		velocityChange *= -1
+	}
+	
+	ball.body.velocity.x += velocityChange*ballVX;
 }
 
 var startGame = function(){
 	ball.body.velocity.setTo(500, -400);
-}
+	//ball.body.velocity.y = 500;
+	}
 
 //This puts the ball back into position if it hits the bottom of the screen
 function restartBall(){
@@ -253,19 +267,24 @@ function restartBall(){
 		ball.body.x = paddle.x - ball.body.width/2
 	}
 	ball.body.y = (game.world.centerY*1.8) - paddle.body.height;
-	  
 }
 
 function update(){
-	if (enlargedPaddle != null){
-		enlargedPaddle.body.x = paddle.body.x;
-	}
 	//Controls for the paddle	
 	paddle.body.velocity.x = 0;
+	if (enlargedPaddle != null){
+		enlargedPaddle.body.velocity.x = 0;
+	}
 	if (cursors.left.isDown){
 		paddle.body.velocity.x = -1 * paddleVelocity;
+		if (enlargedPaddle != null){
+			enlargedPaddle.body.velocity.x = -1 * paddleVelocity;
+		}
 	}else if (cursors.right.isDown){
 		paddle.body.velocity.x = paddleVelocity;
+		if (enlargedPaddle != null){
+			enlargedPaddle.body.velocity.x = paddleVelocity;
+		}
 	}
 	
 	//Runs when the game is not running
