@@ -8,7 +8,7 @@ var game = new Phaser.Game(800, 700, Phaser.CANVAS, '', {
 var paddle;
 var ball;
 var blocks;
-var blocksAmount = 8;
+var blocksAmount = 12;
 var spaceKey;
 var blocksOnScreen = 0;
 var paddleVelocity = 800;
@@ -65,9 +65,9 @@ var gameBlocks = function(){
 	blocks.enableBody = true;
 	levelChoice = getRandomInt(0, 1);
 	if (levelChoice == 0){
-		setUpSmileyFace(blockWidth, blockHeight)
+		drawMap(blockWidth, blockHeight, smileyMap);
 	}else if(levelChoice == 1){
-		setUpRectangle(blockWidth, blockHeight)
+		drawMap(blockWidth, blockHeight, rectangleMap);
 	}
 }
 
@@ -249,7 +249,7 @@ function ballVelocity(ball, paddle){
 		velocityChange *= -1
 	}
 	
-	ball.body.velocity.x += velocityChange*ballVX;
+	ball.body.velocity.x = velocityChange*ballVX;
 }
 
 var startGame = function(){
