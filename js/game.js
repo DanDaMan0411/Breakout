@@ -63,11 +63,15 @@ var gameBlocks = function(){
 	
 	blocks = game.add.group();
 	blocks.enableBody = true;
-	levelChoice = getRandomInt(0, 1);
+	levelChoice = getRandomInt(0, 3);
 	if (levelChoice == 0){
 		drawMap(blockWidth, blockHeight, smileyMap);
 	}else if(levelChoice == 1){
 		drawMap(blockWidth, blockHeight, rectangleMap);
+	}else if (levelChoice == 2){
+		drawMap(blockWidth, blockHeight, pyramidMap);
+	}else if (levelChoice == 3){
+		drawMap(blockWidth, blockHeight, coolPatternMap);
 	}
 }
 
@@ -142,6 +146,7 @@ function levelComplete(){
 	gameRun = false;
 }
 
+//Creates the hamburger power up
 function generateEnlargePaddle(ball, block){	
 	var enlargePaddle = EPPowerUps.create(block.x, block.y, "enlargePaddle")
 		
@@ -162,7 +167,7 @@ function breakBlock(ball, block){
 	block.kill()
 	blocksOnScreen --;
 	
-	var powerUpOdds = getRandomInt(1, 5);
+	var powerUpOdds = getRandomInt(1, 10);
 	
 	if (powerUpOdds == 1){
 		generateEnlargePaddle(ball, block);

@@ -28,14 +28,41 @@ var smileyMap = [
 	["X", "R", "R", "X", "X", "X", "X", "R", "R", "X"],
 	["X", "X", "R", "R", "R", "R", "R", "R", "X", "X"],
 	["X", "X", "R", "R", "R", "R", "R", "R", "X", "X"],
-	["X", "X", "X", "X", "G", "G", "X", "X", "X", "X"],
-	["X", "X", "X", "X", "G", "G", "X", "X", "X", "X"],
-	["X", "X", "X", "X", "G", "G", "X", "X", "X", "X"],
 ]
 
-var poptartMap = [
-	[]
+var pyramidMap = [
+	["Y"],
+	["Y", "Y", "Y"],
+	["Y", "W", "W", "Y"],
+	["Y", "W", "BL", "W", "Y"],
+	["Y", "Y", "W", "W", "Y", "Y"],
+	["Y", "Y", "Y", "Y", "Y", "Y", "Y"],
+	["Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y"],
+	["Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y"],
+	["Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y"],
+	["Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y"],
+	["Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y"],
+	["BR", "BR", "BR", "BR", "BR", "BR", "BR", "BR", "BR", "BR", "BR", "BR", "BR"],
 ]
+
+var coolPatternMap = [
+	["R", "R", "R", "R"],
+	["R", "X", "W", "X", "R"],
+	["R", "X", "W", "W", "X", "R"],
+	["R", "R", "W", "LB", "W", "r", "R"],
+	["R", "X", "W", "LB", "LB", "W", "X", "R"],
+	["R", "X", "W", "LB", "LB", "LB", "W", "X", "R"],
+	["R", "X", "W", "LB", "LB", "LB", "LB", "W", "X", "R"],
+	["R", "X", "W", "LB", "LB", "LB", "LB", "LB", "W", "X", "R"],
+	["R", "X", "W", "LB", "LB", "LB", "LB", "LB", "W", "X", "R"],
+	["R", "X", "W", "LB", "LB", "LB", "LB", "W", "X", "R"],
+	["R", "X", "W", "LB", "LB", "W", "X", "R"],
+	["R", "R", "W", "LB", "W", "R", "R"],
+	["R", "X", "W", "W", "X", "R"],
+	["R", "X", "W", "X", "R"],
+	["R", "R", "R", "R"],
+]
+
 
 drawMap = function(blockWidth, blockHeight, blockMap){
 	
@@ -48,6 +75,7 @@ drawMap = function(blockWidth, blockHeight, blockMap){
 				"DB": 6,
 				"P": 7,
 				"BL": 8,
+				"BR": 10,
 				"X": 11}
 	
 	var numRows = blockMap.length;
