@@ -63,9 +63,42 @@ var coolPatternMap = [
 	["R", "R", "R", "R"],
 ]
 
+var xMap = [
+	["R", "R", "X", "X", "X", "X", "X", "X", "X", "R", "R"],
+	["X", "R", "R", "X", "X", "X", "X", "X", "R", "R", "X"],
+	["X", "X", "R", "R", "X", "X", "X", "R", "R", "X", "X"],
+	["X", "X", "X", "R", "R", "X", "R", "R", "X", "X", "X"],
+	["X", "X", "X", "X", "R", "R", "R", "X", "X", "X", "X"],
+	["X", "X", "X", "X", "R", "R", "R", "X", "X", "X", "X"],
+	["X", "X", "X", "R", "R", "X", "R", "R", "X", "X", "X"],
+	["X", "X", "R", "R", "X", "X", "X", "R", "R", "X", "X"],
+	["X", "R", "R", "X", "X", "X", "X", "X", "R", "R", "X"],
+	["R", "R", "X", "X", "X", "X", "X", "X", "X", "R", "R"],
+]
 
-drawMap = function(blockWidth, blockHeight, blockMap){
-	
+var butterflyMap = [
+	["X"],
+	["BL", "X",  "X", "X", "BL"],
+	["BL", "X", "BL", "X", "BL", "X", "BL"],
+	["BL", "X", "BL", "X", "BL", "X", "BL"],
+	["BL", "X", "BL"],
+	["G", "G", "X", "X", "BR", "BR", "X", "X", "G", "G"],
+	["G", "R", "R", "G", "X", "BR", "BR", "X", "G", "R", "R", "G"],
+	["G", "R", "LB", "R", "G", "BR", "BR", "G", "R", "LB", "R", "G"],
+	["G", "R", "LB", "R", "G", "BR", "BR", "G", "R", "LB", "R", "G"],
+	["G", "R", "LB", "R", "G", "BR", "BR", "G", "R", "LB", "R", "G"],
+	["X", "G", "R", "R", "G", "BR", "BR", "G", "R", "R", "G", "X"],
+	["X", "X", "G", "G", "G", "BR", "BR", "G", "G", "G", "X", "X"],
+	["X", "X", "X", "G", "R", "BR", "BR", "R", "G", "X", "X", "X"],
+	["X", "X", "G", "R", "R", "BR", "BR", "R", "R", "G", "X", "X"],
+	["X", "G", "R", "R", "G", "BR", "BR", "G", "R", "R", "G", "X"],
+	["X", "R", "R", "G", "X", "BR", "BR", "X", "G", "R", "R", "X"],
+	["X", "G", "G", "X", "X", "BR", "BR", "X", "X", "G", "G", "X"],
+	["BR", "BR"],
+	["BR"],
+]
+
+window.drawMap = function(blockWidth, blockHeight, blockMap, blocks){
 	frameKey = {"R": 0,
 				"O": 1,
 				"Y": 2,
