@@ -29,6 +29,22 @@ var menuState = {
 		startLabel.events.onInputDown.add(this.start, this);
 	},
 	
+	makeInfoLabel: function(){
+		infoLabel = game.add.text(game.world.centerX, game.world.centerY, "Start");
+		infoLabel.anchor.setTo(.5, .5);
+		infoLabel.fill = "#FFF";
+		infoLabel.font = "Russo One";
+		infoLabel.fontSize = 75;
+		infoLabel.stroke = "#000";
+		infoLabel.strokeThickness = 1;
+		
+		infoLabel.inputEnabled = true;
+		
+		infoLabel.events.onInputOver.add(function(){startLabel.fill = "#CDCDCD"}, this);
+		infoLabel.events.onInputOut.add(function(){startLabel.fill = "#FFF"}, this);
+		infoLabel.events.onInputDown.add(this.start, this);
+	},
+	
 	makeMenuBricks: function(){
 		menuBlocks = game.add.group();
 		for (var i = 0; i < 7; i ++){

@@ -75,12 +75,17 @@ var playState = {
 	
 	makeNewBall: function(){
 		var newBall = game.add.sprite(game.world.centerX, paddle.x - this.width/2, "ball")
-			
+		
+		var desiredHeight = 23;
+		var desiredWidth = 23;
+		
+		console.log(newBall.height)
+		
 		//Scales down the ball
 		newBall.anchor.setTo(.5, .5);
 		
 		//Regular ball
-		newBall.scale.setTo(.045, .045);
+		newBall.scale.setTo(desiredWidth/newBall.height, desiredHeight/newBall.width);
 
 		//This enables arcade physics and the body, this is really important
 		game.physics.arcade.enable(newBall);
@@ -91,7 +96,7 @@ var playState = {
 		
 		newBall.body.bounce.setTo(1, 1);
 		
-		newBall.body.velocity.setTo(ballVX, 500);
+		newBall.body.velocity.setTo(ballVX, ballVX);
 		
 		balls.add(newBall);
 	},
