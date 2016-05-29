@@ -201,8 +201,8 @@ var playState = {
 		block.kill()
 		blocksOnScreen --;
 		
-		var powerUpOdds = this.getRandomInt(1, 1);
-		var powerUpList = ["enlargePaddle"]//, "heart", "extraBall"] 
+		var powerUpOdds = this.getRandomInt(1, 15);
+		var powerUpList = ["enlargePaddle", "heart", "extraBall"] 
 		if (powerUpOdds == 1){
 			var pickPowerUp = this.getRandomInt(0, powerUpList.length-1);
 			this.generatePowerUp(ball, block, powerUpList[pickPowerUp]);
