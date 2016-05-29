@@ -112,7 +112,7 @@ window.drawMap = function(blockWidth, blockHeight, blockMap, blocks){
 				"X": 11}
 	
 	var numRows = blockMap.length;
-	var blockYPos = 2;
+	var blockYPos = 4;
 	
 	for (var row = 0; row < blockMap.length; row ++){
 		for (var col = 0; col < blockMap[row].length; col++){
@@ -122,6 +122,9 @@ window.drawMap = function(blockWidth, blockHeight, blockMap, blocks){
 				var centerBlock = (game.world.width - numCols*blockWidth)/2;
 
 				var block = blocks.create(col * blockWidth + centerBlock, blockYPos * blockHeight, 'block');
+				
+				block.scale.setTo(1.3, 1.3)
+				
 				block.enableBody = true;
 				block.body.immovable = true;
 				

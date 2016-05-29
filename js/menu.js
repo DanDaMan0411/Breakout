@@ -1,4 +1,8 @@
 var menuState = {
+	getRandomInt: function(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+	
 	makeNameLabel: function(){
 		var nameLabel = game.add.text(game.world.centerX, 100, "Brick Smash!");
 		nameLabel.anchor.setTo(.5, .5);
@@ -10,7 +14,7 @@ var menuState = {
 	},
 	
 	makeStartLabel: function(){
-		var startLabel = game.add.text(game.world.centerX, game.world.centerY, "Start");
+		startLabel = game.add.text(game.world.centerX, game.world.centerY, "Start");
 		startLabel.anchor.setTo(.5, .5);
 		startLabel.fill = "#FFF";
 		startLabel.font = "Russo One";
@@ -25,16 +29,43 @@ var menuState = {
 		startLabel.events.onInputDown.add(this.start, this);
 	},
 	
+	makeMenuBricks: function(){
+		menuBlocks = game.add.group();
+		for (var i = 0; i < 7; i ++){
+			var block = menuBlocks.create(this.getRandomInt(game.world.centerX - 100, game.world.centerX + 100), this.getRandomInt(game.world.centerY - 100, game.world.centerY + 100), "block");
+			block.scale.setTo(1.3, 1.3)
+			
+			block.anchor.setTo(.5, .5);
+			
+			game.physics.arcade.enable(block);
+			
+			block.enableBody = true;
+			
+			block.body.velocity.setTo(this.getRandomInt(-400, 400), this.getRandomInt(-400, 400));
+			
+			block.body.bounce.setTo(1, 1)
+			
+			block.body.collideWorldBounds = true;
+			
+			block.frame = i;
+		}
+	},
+	
 	create: function(){
 		var background = game.add.sprite(0, 0, 'background1');
-		background.scale.setTo(2, 2)
+		background.scale.setTo(3, 3)
 		
-		this.makeNameLabel()
-		this.makeStartLabel()
+		this.makeMenuBricks();
+		this.makeNameLabel();
+		this.makeStartLabel();
 		
 		var wKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		
 		wKey.onDown.addOnce(this.start, this);
+	},
+	
+	update: function(){
+		game.physics.arcade.collide(menuBlocks, menuBlocks);
 	},
 	
 	start: function(){

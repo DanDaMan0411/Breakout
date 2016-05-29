@@ -1,6 +1,6 @@
 function init(){
-	window.game = new Phaser.Game(800, 700, Phaser.CANVAS, '', {
-	});
+	
+	window.game = new Phaser.Game(800, 1000, Phaser.CANVAS, '', {});
 	game.state.add('boot', bootState);
 	game.state.add('load', loadState);
 	game.state.add('menu', menuState);

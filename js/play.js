@@ -8,10 +8,11 @@ var paddleVelocity = 800;
 var level = 1;
 var gameRun = false;
 var enlargePaddle;
-var EPPowerUps;
+var powerUps;
 var enlargedPaddle;
 
 var amntLives = 3;
+var maxLives = 5;
 
 var lastScore;
 
@@ -24,9 +25,14 @@ var score = 0;
 var scoreText;
 
 var ballVX = 400;
+
+var leftBtnDown = false;
+var rightBtnDown = false;
+var upBtnDown = false;
+
 var playState = {
 	gamePaddle: function(){
-		paddle = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, "paddle");
+		paddle = game.add.sprite(game.world.centerX, game.world.centerY * 1.7, "paddle");
 				
 		//This makes the center of the paddle in the middle instead of the top left corner
 		paddle.anchor.setTo(.5, .5);
@@ -47,8 +53,8 @@ var playState = {
 	},
 
 	gameBlocks: function(){
-		var blockWidth = 176/4;
-		var blockHeight = 66/3;
+		var blockWidth = (176/4) * 1.3;
+		var blockHeight = (66/3)* 1.3;
 		
 		var mapList = [
 			smileyMap,
@@ -66,34 +72,38 @@ var playState = {
 		drawMap(blockWidth, blockHeight, mapList[levelChoice], blocks);
 		
 	},
-
-	gameBall: function(){
-		ball = game.add.sprite(game.world.centerX, (game.world.centerY*1.8) - paddle.body.height, "ball");
-		
+	
+	makeNewBall: function(){
+		var newBall = game.add.sprite(game.world.centerX, paddle.x - this.width/2, "ball")
+			
 		//Scales down the ball
-		ball.anchor.setTo(.5, .5);
-		
-		//Huge ball
-		//ball.scale.setTo(2, 2);
+		newBall.anchor.setTo(.5, .5);
 		
 		//Regular ball
-		ball.scale.setTo(.035, .035);
-		
-		game.physics.arcade.enable(ball);
-		
-		ball.enableBody = true;
-			
+		newBall.scale.setTo(.045, .045);
+
 		//This enables arcade physics and the body, this is really important
-		game.physics.arcade.enable(ball);
+		game.physics.arcade.enable(newBall);
 		
-		ball.body.collideWorldBounds = true;
+		newBall.enableBody = true;
+					
+		newBall.body.collideWorldBounds = true;
 		
-		ball.body.bounce.setTo(1, 1);
+		newBall.body.bounce.setTo(1, 1);
+		
+		newBall.body.velocity.setTo(ballVX, 500);
+		
+		balls.add(newBall);
+	},
+	
+	gameBalls: function(){
+		balls = game.add.group();
+		balls.enableBody = true;
 	},
 
-	EPPowerUp: function(){
-		EPPowerUps = game.add.group();
-		EPPowerUps.enableBody = true;
+	configPowerUps: function(){
+		powerUps = game.add.group();
+		powerUps.enableBody = true;
 	},
 
 	updateScore: function(){
@@ -104,6 +114,7 @@ var playState = {
 		scoreText.font = "Russo One";
 		scoreText.fill = "#FFF";
 		scoreText.stroke = "#000";
+		scoreText.fontSize = 50;
 		scoreText.strokeThickness = 1;
 	},
 	
@@ -115,8 +126,9 @@ var playState = {
 	updateLives: function(){
 		lives.removeAll();
 		for (var i = 0; i < amntLives; i ++){
-			var life = lives.create( game.world.width - (i + 1) * 50, 10, "heart");
-			life.scale.setTo(.25, .25)
+			var life = lives.create( game.world.width - (i + 1) * 60, 10, "heart");
+			life.scale.setTo(.3, .3)
+						
 			lives.add(life);
 		}
 	},
@@ -125,21 +137,22 @@ var playState = {
 		this.updateScore();
 		this.updateLives();
 	},
-
+	
 	create: function(){
 		//Gets the keyboard input of up down left right
 		cursors = game.input.keyboard.createCursorKeys();
 		
 		gameBackground = game.add.sprite(0, 0, "background1")
-		gameBackground.scale.setTo(2, 2)
+		gameBackground.scale.setTo(3, 3)
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 
 		this.gamePaddle();
-		this.gameBall();
+		this.gameBalls();
+		this.makeNewBall();
 		
 		this.gameBlocks();
 		
-		this.EPPowerUp();
+		this.configPowerUps();
 		this.configLives();
 		
 		this.makeHUD();
@@ -154,21 +167,25 @@ var playState = {
 		console.log("Level complete");
 		level ++;
 		this.gameBlocks();
-		console.log(level)
+		this.configPowerUps();
+		console.log(level);
 		gameRun = false;
 	},
 
 	//Creates the hamburger power up
-	generateEnlargePaddle: function(ball, block){	
-		var enlargePaddle = EPPowerUps.create(block.x, block.y, "enlargePaddle")
-			
-		var scaleFactor = enlargePaddle.height/50
-			
-		enlargePaddle.enableBody = true;
-		enlargePaddle.scale.setTo(1/scaleFactor, 1/scaleFactor);
-		enlargePaddle.body.height = 50;
-		enlargePaddle.body.width = 50;
-		enlargePaddle.body.velocity.setTo(0, 100);
+	generatePowerUp: function(ball, block, powerUpName){		
+		var powerUp = powerUps.create(block.x, block.y, powerUpName)
+		var powerUpHeight = 75;
+		var powerUpWidth = 75;
+		
+		powerUp.scale.setTo(powerUpHeight/powerUp.height, powerUpWidth/powerUp.width)
+		
+		powerUp.name = powerUpName
+		
+		game.physics.arcade.enable(powerUp);
+		
+		powerUp.enableBody = true;
+		powerUp.body.velocity.setTo(0, 100);
 	},
 
 	breakBlock: function(ball, block){
@@ -179,10 +196,11 @@ var playState = {
 		block.kill()
 		blocksOnScreen --;
 		
-		var powerUpOdds = this.getRandomInt(1, 10);
-		
+		var powerUpOdds = this.getRandomInt(1, 15);
+		var powerUpList = ["enlargePaddle", "heart", "extraBall"] 
 		if (powerUpOdds == 1){
-			this.generateEnlargePaddle(ball, block);
+			var pickPowerUp = this.getRandomInt(0, powerUpList.length-1);
+			this.generatePowerUp(ball, block, powerUpList[pickPowerUp]);
 		}
 		
 		if (blocksOnScreen == 0){
@@ -230,27 +248,36 @@ var playState = {
 		enlargedPaddle.body.immovable = true;
 	},
 
-	gotEnlargePaddle: function(paddle, enlargePaddle){
+	gotPowerUp: function(paddle, powerUp){		
 		//This kills the hamburger
-		enlargePaddle.kill();
+		powerUp.kill();
 
 		score += 1000;
 		this.updateScore();
 		
-		if (!paddleEnlarged){
-			startEnlargeTimer = setInterval(this.enlargeTimer, 1000);
-			if (enlargedPaddle != null){
-				enlargedPaddle.kill();
+		if (powerUp.name == "enlargePaddle"){
+			if (!paddleEnlarged){
+				startEnlargeTimer = setInterval(this.enlargeTimer, 1000);
+				if (enlargedPaddle != null){
+					enlargedPaddle.kill();
+				}
+				
+				this.makeEnlargePaddle();	
+			}else{
+				enlargeTime = 0;
 			}
-			
-			this.makeEnlargePaddle();	
-		}else{
-			enlargeTime = 0;
+		}else if(powerUp.name == "heart"){
+			if (amntLives <= maxLives){
+				amntLives ++;
+				this.updateLives();
+			}
+		}else if(powerUp.name == "extraBall"){
+			this.makeNewBall();
 		}
 	},
 
-	ballVelocity: function(ball, paddle){
-		game.physics.arcade.collide(ball, paddle);
+	ballVelocity: function(paddle, ball){		
+		game.physics.arcade.collide(paddle, ball);
 		
 		if (enlargedPaddle == null){
 			var distanceDif = Math.abs(ball.x - paddle.x);
@@ -259,40 +286,56 @@ var playState = {
 			var distanceDif = Math.abs(ball.x - enlargedPaddle.x);
 			var velocityChange = distanceDif/(enlargedPaddle.body.width/2)
 		}
-		
-		//ballVX = 0;
-		
+				
 		if (ball.x < paddle.x){
-			velocityChange *= -1
+			velocityChange *= -1;
 		}
 		
 		ball.body.velocity.x = velocityChange*ballVX;
 	},
 
 	startGame: function(){
-		ball.body.velocity.setTo(500, -400);
-		//ball.body.velocity.y = 500;
+		var directionChoice = this.getRandomInt(0, 1)
+		if (directionChoice == 1){
+			balls.children[0].body.velocity.setTo(-ballVX, -400);
+		}else{
+			balls.children[0].body.velocity.setTo(ballVX, -400);
+		}
+		gameRun = true;
 	},
 
 	//This puts the ball back into position if it hits the bottom of the screen
 	restartBall: function(){
-		//Resets the ball position
-		ball.body.velocity.setTo(0, 0);
-		if (enlargedPaddle != null){
-			ball.body.x = enlargedPaddle.x - ball.body.width/2;
-		}else{
-			ball.body.x = paddle.x - ball.body.width/2
+		for (var i = 1; i < balls.children.length; i ++){
+			balls.children[i].destroy();
 		}
-		ball.body.y = (game.world.centerY*1.8) - paddle.body.height;
+		
+		balls.children[0].body.velocity.setTo(0, 0);
+		
+		//Resets the ball position
+		if (enlargedPaddle != null){
+			balls.children[0].body.x = enlargedPaddle.x - balls.children[0].body.width/2;
+		}else{
+			balls.children[0].body.x = paddle.x - balls.children[0].width/2;
+		}
+		balls.children[0].body.y = (game.world.centerY*1.7) - paddle.body.height - 7;
 	},
-
-	update: function(){
+	
+	update: function(){		
 		//Controls for the paddle	
 		paddle.body.velocity.x = 0;
 		if (enlargedPaddle != null){
 			enlargedPaddle.body.velocity.x = 0;
 		}
-		if (cursors.left.isDown){
+				
+		//Follows mouse
+		paddle.body.x = game.input.activePointer.x - paddle.width/2
+		if (enlargedPaddle != null){
+			enlargedPaddle.body.x = game.input.activePointer.x - enlargedPaddle.width/2
+		}
+		
+		//Uses arrow keys
+		/*if (cursors.left.isDown){
 			paddle.body.velocity.x = -1 * paddleVelocity;
 			if (enlargedPaddle != null){
 				enlargedPaddle.body.velocity.x = -1 * paddleVelocity;
@@ -302,6 +345,13 @@ var playState = {
 			if (enlargedPaddle != null){
 				enlargedPaddle.body.velocity.x = paddleVelocity;
 			}
+		}*/
+		
+		//This starts the game where the ball starts moving
+		if (this.spaceKey.isDown || game.input.activePointer.isDown){
+			if (!gameRun){
+				this.startGame();
+			}
 		}
 		
 		//Runs when the game is not running
@@ -309,37 +359,36 @@ var playState = {
 			this.restartBall();
 		}
 		
-		//This starts the game where the ball starts moving
-		if (this.spaceKey.isDown){
-			if (!gameRun){
-				gameRun = true;
-				this.startGame();
-			}
-		}
-		
-		game.physics.arcade.overlap(paddle, EPPowerUps, this.gotEnlargePaddle, null, this);
-		game.physics.arcade.overlap(enlargedPaddle, EPPowerUps, this.gotEnlargePaddle, null, this);
+		game.physics.arcade.overlap(paddle, powerUps, this.gotPowerUp, null, this);
+		game.physics.arcade.overlap(enlargedPaddle, powerUps, this.gotPowerUp, null, this);
 		
 		if (gameRun){
 			//Hit AI
-			game.physics.arcade.overlap(ball, blocks, this.breakBlock, null, this);
-			game.physics.arcade.overlap(ball, paddle, this.ballVelocity, null, this);
-			game.physics.arcade.overlap(ball, enlargedPaddle, this.ballVelocity, null, this);
+			game.physics.arcade.overlap(balls, blocks, this.breakBlock, null, this);
+			game.physics.arcade.overlap(balls, paddle, this.ballVelocity, null, this);
+			game.physics.arcade.overlap(balls, enlargedPaddle, this.ballVelocity, null, this);
 			
-
-			//Sees if the ball hit the bottom of the screen		
-			if (ball.body.y + ball.body.height >= game.world.height){
-				gameRun = false;
-				amntLives --;
-				if (amntLives <= 0){
-					lastScore = score;
-					this.restartGameInfo();
-					game.state.start("end");
-				}
-				this.updateLives();
-				
-				//This prevents people who hold down the space bar to mess up the beginning of the next round
-				this.spaceKey.isDown = false;
+			for (var ballId = 0; ballId < balls.children.length; ballId ++){
+				//Sees if the ball hit the bottom of the screen	
+				if (balls.children[ballId].body.y + balls.children[ballId].body.height >= game.world.height){					
+					balls.children[ballId].kill();
+					balls.remove(balls.children[ballId]);
+					if (balls.children.length == 0){
+						gameRun = false;
+						this.makeNewBall();
+												
+						amntLives --;
+						if (amntLives <= 0){
+							lastScore = score;
+							this.restartGameInfo();
+							game.state.start("end");
+						};
+						this.updateLives();
+						//This prevents people who hold down the space bar to mess up the beginning of the next round
+						this.spaceKey.isDown = false;
+						game.input.activePointer.isDown = false;
+					};
+				};
 			};
 		};
 	},
