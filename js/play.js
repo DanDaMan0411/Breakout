@@ -201,8 +201,8 @@ var playState = {
 		block.kill()
 		blocksOnScreen --;
 		
-		var powerUpOdds = this.getRandomInt(1, 15);
-		var powerUpList = ["enlargePaddle", "heart", "extraBall"] 
+		var powerUpOdds = this.getRandomInt(1, 1);
+		var powerUpList = ["enlargePaddle"]//, "heart", "extraBall"] 
 		if (powerUpOdds == 1){
 			var pickPowerUp = this.getRandomInt(0, powerUpList.length-1);
 			this.generatePowerUp(ball, block, powerUpList[pickPowerUp]);
@@ -219,10 +219,7 @@ var playState = {
 			clearInterval(startEnlargeTimer);
 			paddleEnlarged = false;
 			
-			enlargedPaddle.kill();
-			
-			//This is done to make ball follow normal paddle again
-			enlargedPaddle = null;
+			enlargedPaddle.destroy();
 			
 			paddle.alpha = 1;
 			enlargeTime = 0;
@@ -326,7 +323,7 @@ var playState = {
 		balls.children[0].body.y = (game.world.centerY*1.7) - paddle.body.height - 7;
 	},
 	
-	update: function(){		
+	update: function(){				
 		//Controls for the paddle	
 		paddle.body.velocity.x = 0;
 		if (enlargedPaddle != null){
@@ -403,6 +400,22 @@ var playState = {
 		amntLives = 3;
 		this.updateLives();
 		score = 0;
+		console.log("Info restarted")
+		
+		//This is to get rid of enlarged paddle if player loses with it equipped
+		if (enlargedPaddle != null){
+			console.log("poopop")
+			clearInterval(startEnlargeTimer);
+			paddleEnlarged = false;
+			
+			enlargedPaddle.destroy();
+			
+			enlargedPaddle = null;
+			
+			paddle.alpha = 1;
+			enlargeTime = 0;
+		}
+		
 		this.updateScore();
 		this.gameBlocks();
 	},
