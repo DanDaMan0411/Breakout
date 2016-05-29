@@ -173,7 +173,7 @@ var playState = {
 		level ++;
 		this.gameBlocks();
 		this.configPowerUps();
-		console.log(level);
+		game.input.activePointer.isDown = false;
 		gameRun = false;
 	},
 
