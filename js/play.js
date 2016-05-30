@@ -221,6 +221,8 @@ var playState = {
 			
 			enlargedPaddle.destroy();
 			
+			enlargedPaddle = null;
+			
 			paddle.alpha = 1;
 			enlargeTime = 0;
 		}
@@ -323,7 +325,9 @@ var playState = {
 		balls.children[0].body.y = (game.world.centerY*1.7) - paddle.body.height - 7;
 	},
 	
-	update: function(){				
+	update: function(){
+		console.log(enlargedPaddle)
+		
 		//Controls for the paddle	
 		paddle.body.velocity.x = 0;
 		if (enlargedPaddle != null){
